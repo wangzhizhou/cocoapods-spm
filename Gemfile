@@ -31,6 +31,7 @@ group :development do
   gem "bundler", "> 1.3"
   gem "cocoapods-compact-spec"
   gem "cocoapods-xcconfig-hooks"
+  gem "debug"
   gem "pry-nav"
   gem "rspec"
   gem "rubocop"
