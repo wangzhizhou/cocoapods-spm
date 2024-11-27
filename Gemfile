@@ -34,4 +34,5 @@ group :development do
   gem "pry-nav"
   gem "rspec"
   gem "rubocop"
+  gem "xcpretty"
 end
