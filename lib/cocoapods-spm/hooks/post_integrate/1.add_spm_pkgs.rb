@@ -8,12 +8,31 @@ module Pod
         def run
           return if @spm_resolver.result.spm_pkgs.empty?
 
-          add_spm_pkg_refs_to_project
-          add_spm_products_to_targets
-          pods_project.save
+          if podfile.installation_options.generate_multiple_pod_projects
+            add_spm_pkg_refs_to_pod_target_subprojects
+          else
+            add_spm_pkg_refs_to_project
+            add_spm_products_to_targets
+            pods_project.save
+          end
         end
 
         private
+
+        def add_spm_pkg_refs_to_pod_target_subprojects
+          pod_target_subprojects.each do |pod_target_subproject|
+            pod_target_subproject.root_object.targets.each do |target|
+              @spm_resolver.result.spm_dependencies_for(target).each do |dep|
+                pkg_ref = dep.pkg.create_pkg_ref(pod_target_subproject)
+                pod_target_subproject.root_object.package_references << pkg_ref
+                target_dep_ref = pkg_ref.create_target_dependency_ref(dep.product)
+                target.dependencies << target_dep_ref
+                target.package_product_dependencies << target_dep_ref.product_ref if dep.pkg.use_default_xcode_linking?
+              end
+            end
+            pod_target_subproject.save
+          end
+        end
 
         def spm_pkg_refs
           @spm_pkg_refs ||= {}
